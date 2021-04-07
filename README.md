@@ -1,12 +1,13 @@
 
+
+We will proccess data sources via the **command line** 
+
+compile various commands with control flow into a script in some language...
+
 # Load Data into Kismet
 
 Kismet recieves data (which can be packets, devices, or other information) from “data sources”
  - we will use pcap files as our primary viable data source... Ubertooth... more?
-
-We will proccess data sources via the **command line** 
-
-compile commands with control flow into a scipt.
 
 
 #### ex.
