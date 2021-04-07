@@ -10,7 +10,6 @@ Kismet recieves data (which can be packets, devices, or other information) from 
  - we will use pcap files as our primary viable data source... Ubertooth... more?
 
 
-#### ex.
 ```bash
 $ kismet -c /catpures/foo.pcap:uuid=1,realtime=false,pps=1000,name=capture_1
 ```
