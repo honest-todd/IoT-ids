@@ -1,6 +1,23 @@
+# Capturing Bluetooth Traffic using Wireshark
+Wireshark can be accesed using the terminal command:
 
+```bash
+$ wireshark
+```
+This will open the wireshark GUI
 
-We will proccess data sources via the **command line** 
+Bluetooth traffic can either be captured life or the path of a pcap file can be used.
+To find the mac addressed for the Bluetooth traffic being analysed type the following in the address bar:
+
+### bthci_evt.bd_addr
+
+Finally, you can export the resulting packets as a pcap by going to File and selecting:
+
+### Export Specified Packets...
+
+# Processing the Data
+
+We will process data sources via the **command line** 
 
 compile various commands with control flow into a script in some language...
 
