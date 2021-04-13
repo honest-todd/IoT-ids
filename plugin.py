@@ -4,6 +4,17 @@ from pathlib import Path
 import os
 
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--read', '-r', type=open, help='read pcap file')
+    parser.add_argument('--capture', '-Uc', nargs='*', help='live capture using ubertooth')
+    parser.add_argument('--help', '-h', help='show this help message')
+    parser.add_argument(
+        '--out', '-o', action='store', type=argparse.FileType('w'), dest='output', help='')
+    args = parser.parse_args()
+    MethodTshark(args.read, args.output)
+
+
 class MethodTshark:
     def __init__(self, pcap=args.read, output=args.output):
         self.pcap = pcap
@@ -23,17 +34,5 @@ class MethodTshark:
         subprocess.run(cmd)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--read', '-r', type=open, help='read pecap file')
-    parser.add_argument('--capture', '-Uc', nargs='*', help='live capture using ubertooth')
-    parser.add_argument('--help', '-h', help='show this help message')
-    parser.add_argument(
-        '--out', '-o', action='store', type=argparse.FileType('w'), dest='output', help='')
-    args = parser.parse_args()
-    MethodTshark(args.read, args.output)
-
-
 if __name__ == '__main__':
     main()
-
