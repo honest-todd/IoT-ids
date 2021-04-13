@@ -1,6 +1,5 @@
 import argparse
 import subprocess
-from pathlib import Path 
 import os
 
 
@@ -8,7 +7,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--read', '-r', type=open, help='read pcap file')
     parser.add_argument('--capture', '-Uc', nargs='*', help='live capture using ubertooth')
-    parser.add_argument('--help', '-h', help='show this help message')
     parser.add_argument(
         '--out', '-o', action='store', type=argparse.FileType('w'), dest='output', help='')
     args = parser.parse_args()
@@ -16,8 +14,8 @@ def main():
 
 
 class MethodTshark:
-    def __init__(self, pcap=args.read, output=args.output):
-        self.pcap = pcap
+    def __init__(self, pcap, output):
+        self.pcap = os.path.abspath(pcap)
         self.output = output
 
     def filter(self):
@@ -30,7 +28,7 @@ class MethodTshark:
         else:
             pass
 
-        cmd = ['tshark', '-r', Path(self.pcap), '-R', 'bthci_evt.bd_addr', '-o', self.output]
+        cmd = ['tshark', '-r', self.pcap, '-R', 'bthci_evt.bd_addr', '-o', self.output]
         subprocess.run(cmd)
 
 
