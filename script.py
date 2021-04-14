@@ -5,32 +5,26 @@ import requests
 import argparse
 import json
 from requests.exceptions import HTTPError
+from config import credentials
        
 class kismet():
     '''
-        
+        usage: python3 script.py -d captures -t add-source
     '''
-    def __init__(self):
-        self.parser = argparse.ArgumentParser()
-        content = self.parse_args()
-        self.username = content.username
-        self.password = content.password
-        self.directory = content.directory
-        
-    def parse_args(self):
-        '''
-            python3 script.py -d captures -u jugegp16 -p peep1
-        '''
-        self.parser.add_argument('-d', '--directory', type=str)
-        self.parser.add_argument('-u', '--username',  type=str)
-        self.parser.add_argument('-p', '--password',  type=str)
-        return self.parser.parse_args()
+    def __init__(self, dir, task):
+        self.dir = os.path.abspath(os.path.dirname(dir))
+        self.task = task
 
     def api_call(self, url):
         '''
         '''
         try:
-            resp = requests.get("http://{}:{}@localhost:2501/{}".format(self.username, self.password, url))
+            resp = requests.get("http://{}:{}@localhost:2501/{}".format(
+                                    credentials['username'], 
+                                    credentials['password'], 
+                                    url
+                                ))
+            
             if resp.status_code == 200: return resp.text
             return resp.status_code
         except:
@@ -54,7 +48,7 @@ class kismet():
         
         # convert to json
         resp = json.loads(resp)
-        print(resp)
+        return resp
     
     
     def get_datasources(self):
@@ -66,7 +60,7 @@ class kismet():
         
         # convert to json
         resp = json.loads(resp)
-        print(resp)
+        return resp
     
     def add_datasource(self, source ='/captures/Bluetooth1.cap', name ='Bluetooth1.cap'):
         '''
@@ -77,18 +71,40 @@ class kismet():
             posts a capture to a session.
         '''
         try:
-            requests.post("http://{}:{}@localhost:2501/datasource/add_source.cmd".format(self.username, self.password), 
-                          data={'source':'{}:type=pcapfile'.format(source),
-                                'name': '{}'.format(name),
-                                'realtime': 'false'
+            requests.post("http://{}:{}@localhost:2501/datasource/add_source.cmd".format(
+                                    credentials['username'], 
+                                    credentials['password']), 
+                                    data={'source':'{}:type=pcapfile'.format(source),
+                                    'name': '{}'.format(name),
+                                    'realtime': 'false'
                                 })
+                        
         except HTTPError as http_err:
             print(f'HTTP error occurred: {http_err}')
+    
+    def run_task(self):
+        '''
+            Runs a routine specified via command line. Either analysis of ids or add source.
+        '''
+        if self.check_login() == -1: 
+            sys.exit()
         
+        if self.task == 'add-source':
+            self.add_datasource()
+        elif self.task == 'analysis':
+            # write to file
+            print('USER: {}'.format(credentials['username']))
+            print('DATA SOURCES: {}'.format(self.get_datasources()))
+            print('ACTIVE LOGS: {}'.format(self.get_active_logs()))
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--dir', required=True, type=str)
+    parser.add_argument('-t', '--task',  choices = ['analysis', 'add-source'], required=True, type=str)
+    contents = parser.parse_args()
+    kis = kismet(contents.dir, contents.task)
+    kis.run_task()
     
 if __name__ == '__main__':
-    kismet = kismet()
-    if kismet.check_login() == -1: sys.exit()
-    kismet.get_active_logs()
-    kismet.add_datasource()
-    kismet.get_datasources()
+    main()
