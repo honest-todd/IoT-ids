@@ -9,10 +9,12 @@ from config import credentials
        
 class kismet():
     '''
-        usage: python3 script.py -d captures -t add-source
+        python3 script.py -t add-source -f captures/Bluetooth1.cap 
+        
+        python3 script.py -t analysis
     '''
-    def __init__(self, dir, task):
-        self.dir = os.path.abspath(os.path.dirname(dir))
+    def __init__(self, file, task):
+        self.file = file
         self.task = task
 
     def api_call(self, url):
@@ -62,7 +64,7 @@ class kismet():
         resp = json.loads(resp)
         return resp
     
-    def add_datasource(self, source ='/captures/Bluetooth1.cap', name ='Bluetooth1.cap'):
+    def add_datasource(self):
         '''
             params
                 source -- url of capture file
@@ -71,13 +73,16 @@ class kismet():
             posts a capture to a session.
         '''
         try:
-            requests.post("http://{}:{}@localhost:2501/datasource/add_source.cmd".format(
-                                    credentials['username'], 
-                                    credentials['password']), 
-                                    data={'source':'{}:type=pcapfile'.format(source),
-                                    'name': '{}'.format(name),
-                                    'realtime': 'false'
-                                })
+            for source in self.file:
+                path = os.path.abspath(os.path.dirname(source))
+                print(path)
+                requests.post("http://{}:{}@localhost:2501/datasource/add_source.cmd".format(
+                                        credentials['username'], 
+                                        credentials['password']), 
+                                        data={'source':'{}:type=pcapfile'.format(path),
+                                        'name': '{}'.format(source),
+                                        'realtime': 'false'
+                                    })
                         
         except HTTPError as http_err:
             print(f'HTTP error occurred: {http_err}')
@@ -100,10 +105,10 @@ class kismet():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--dir', required=True, type=str)
+    parser.add_argument('-f', '--file', nargs='*', type=str)
     parser.add_argument('-t', '--task',  choices = ['analysis', 'add-source'], required=True, type=str)
     contents = parser.parse_args()
-    kis = kismet(contents.dir, contents.task)
+    kis = kismet(contents.file, contents.task)
     kis.run_task()
     
 if __name__ == '__main__':
