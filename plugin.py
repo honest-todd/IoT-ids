@@ -14,13 +14,13 @@ def main():
     args = parser.parse_args()
     tshark = MethodTshark(args.read, args.output, args.capture, args.interface)
 
-    if args.read is True:
+    if args.read is not None:
         tshark.filter()
-    elif args.interface is True and args.capture is True:
+    elif args.interface is not None and args.capture is not None:
         tshark.capture()
-    elif args.interface is True and args.capture is False:
+    elif args.interface is not None and args.capture is None:
         tshark.capture()
-    elif args.interface is False and args.capture is True:
+    elif args.interface is None and args.capture is not None:
         print('ERROR: Must specify Interface')
         exit()
 
