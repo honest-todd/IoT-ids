@@ -13,9 +13,10 @@ class kismet():
         
         python3 script.py -t analysis
     '''
-    def __init__(self, file, task):
-        self.file = file
+    def __init__(self, source, task, alert):
+        self.source = source
         self.task = task
+        self.alert = alert
 
     def api_call(self, url):
         '''
@@ -24,7 +25,7 @@ class kismet():
             resp = requests.get("http://{}:{}@localhost:2501/{}".format(
                                     credentials['username'], 
                                     credentials['password'], 
-                                    url
+                                    self.url
                                 ))
             
             if resp.status_code == 200: return resp.text
@@ -64,6 +65,12 @@ class kismet():
         resp = json.loads(resp)
         return resp
     
+    def view_alert(self):
+        '''
+        '''
+        resp = self.api_call("alerts/alerts_view.json")
+        return resp
+
     def add_datasource(self):
         '''
             params
@@ -73,31 +80,51 @@ class kismet():
             posts a capture to a session.
         '''
         try:
-            for source in self.file:
+            for source in self.source:
                 path = os.path.abspath(os.path.dirname(source))
-                print(path)
                 requests.post("http://{}:{}@localhost:2501/datasource/add_source.cmd".format(
                                         credentials['username'], 
                                         credentials['password']), 
-                                        data={'source':'{}:type=pcapfile'.format(path),
-                                        'name': '{}'.format(source),
-                                        'realtime': 'false'
-                                    })
+                                        data={
+                                            'source':'{}:type=pcapfile'.format(path),
+                                            'name': '{}'.format(source),
+                                            'realtime': 'false'
+                                        })
                         
         except HTTPError as http_err:
             print(f'HTTP error occurred: {http_err}')
-    
+
+    def add_alert(self):
+        try:
+            requests.post("http://{}:{}@localhost:2501/alerts/definitions/define_alert.cmd".format(
+                                            credentials['username'], 
+                                            credentials['password']), 
+                                            data={
+                                                'class':'{}'.format(self.alert)
+                                                # ,
+                                                # 'severity': '{}'.format(severity),
+                                                # 'throttle': '{}'.format(throttle),
+                                                # 'burst': '{}'.format(burst)
+                                            })
+
+        except HTTPError as http_err:
+            print(f'HTTP error occurred: {http_err}')
+
+
     def run_task(self):
         '''
             Runs a routine specified via command line. Either analysis of ids or add source.
         '''
         if self.check_login() == -1: 
             sys.exit()
-        
-        if self.task == 'add-source':
+
+        elif self.task == 'add-source':
             self.add_datasource()
+
+        elif self.task == 'add-alert':
+            self.add_alert()
+
         elif self.task == 'analysis':
-            # write to file
             print('USER: {}'.format(credentials['username']))
             print('DATA SOURCES: {}'.format(self.get_datasources()))
             print('ACTIVE LOGS: {}'.format(self.get_active_logs()))
@@ -106,7 +133,8 @@ class kismet():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--file', nargs='*', type=str)
-    parser.add_argument('-t', '--task',  choices = ['analysis', 'add-source'], required=True, type=str)
+    parser.add_argument('-a', '--alert', nargs='*', type=str)
+    parser.add_argument('-t', '--task',  choices = ['analysis', 'add-source', 'add-alert'], required=True, type=str)
     contents = parser.parse_args()
     kis = kismet(contents.file, contents.task)
     kis.run_task()

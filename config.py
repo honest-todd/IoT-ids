@@ -1,4 +1,4 @@
 credentials = {
     'username': 'test',
-    'password': 'testpass'
+    'password': 'test'
 }
