@@ -23,15 +23,14 @@ class kismet():
         '''
         try:
             resp = requests.get("http://{}:{}@localhost:2501/{}".format(
-                                    credentials['username'], 
-                                    credentials['password'], 
-                                    self.url
-                                ))
-            
+                                        credentials['username'], 
+                                        credentials['password'], 
+                                        url
+                                    ))
             if resp.status_code == 200: return resp.text
-            return resp.status_code
-        except:
-            print('ERROR: make sure kismet is running locally')
+
+        except HTTPError as http_err:
+            print(f'HTTP error occurred: {http_err}')
         
     def check_login(self):
         '''
@@ -49,9 +48,7 @@ class kismet():
         if resp == 404:
             print('ERROR: no active logs found')
         
-        # convert to json
-        resp = json.loads(resp)
-        return resp
+        return json.loads(resp)
     
     
     def get_datasources(self):
@@ -73,42 +70,34 @@ class kismet():
 
     def add_datasource(self):
         '''
-            params
-                source -- url of capture file
-                name -- some name for datasource
-                
-            posts a capture to a session.
+           add a datasource to a session
         '''
-        try:
-            for source in self.source:
-                path = os.path.abspath(os.path.dirname(source))
-                requests.post("http://{}:{}@localhost:2501/datasource/add_source.cmd".format(
-                                        credentials['username'], 
-                                        credentials['password']), 
-                                        data={
-                                            'source':'{}:type=pcapfile'.format(path),
-                                            'name': '{}'.format(source),
-                                            'realtime': 'false'
-                                        })
-                        
-        except HTTPError as http_err:
-            print(f'HTTP error occurred: {http_err}')
+        for src in self.source:
+            path = os.path.abspath(os.path.dirname(src))
+            requests.post("http://{}:{}@localhost:2501/datasource/add_source.cmd".format(
+                                    credentials['username'], 
+                                    credentials['password']), 
+                                    data={
+                                        "source":path,
+                                        'name': '{}'.format(src),
+                                        'realtime': 'false'
+                                    })
 
     def add_alert(self):
-        try:
+        '''
+            add an alert to a session
+        '''
+        for al in self.alert:
             requests.post("http://{}:{}@localhost:2501/alerts/definitions/define_alert.cmd".format(
                                             credentials['username'], 
                                             credentials['password']), 
                                             data={
-                                                'class':'{}'.format(self.alert)
+                                                'class':'{}'.format(al)
                                                 # ,
                                                 # 'severity': '{}'.format(severity),
                                                 # 'throttle': '{}'.format(throttle),
                                                 # 'burst': '{}'.format(burst)
                                             })
-
-        except HTTPError as http_err:
-            print(f'HTTP error occurred: {http_err}')
 
 
     def run_task(self):
@@ -136,7 +125,7 @@ def main():
     parser.add_argument('-a', '--alert', nargs='*', type=str)
     parser.add_argument('-t', '--task',  choices = ['analysis', 'add-source', 'add-alert'], required=True, type=str)
     contents = parser.parse_args()
-    kis = kismet(contents.file, contents.task)
+    kis = kismet(contents.file, contents.task, contents.alert)
     kis.run_task()
     
 if __name__ == '__main__':
