@@ -9,9 +9,7 @@ from config import credentials
        
 class kismet():
     '''
-        python3 script.py -t add-source -f captures/Bluetooth1.cap 
         
-        python3 script.py -t analysis
     '''
     def __init__(self, source, task, alert):
         self.source = source
@@ -42,7 +40,6 @@ class kismet():
     
     def get_active_logs(self):
         '''
-        
         '''
         resp = self.api_call("logging/active.itjson")
         if resp == 404:
@@ -71,6 +68,8 @@ class kismet():
     def add_datasource(self):
         '''
            add a datasource to a session
+
+           https://www.kismetwireless.net/docs/devel/webui_rest/datasources/
         '''
         for src in self.source:
             path = os.path.abspath(os.path.dirname(src))
@@ -86,17 +85,17 @@ class kismet():
     def add_alert(self):
         '''
             add an alert to a session
+
+            https://www.kismetwireless.net/docs/devel/webui_rest/alerts/
         '''
         for al in self.alert:
             requests.post("http://{}:{}@localhost:2501/alerts/definitions/define_alert.cmd".format(
                                             credentials['username'], 
                                             credentials['password']), 
                                             data={
-                                                'class':'{}'.format(al)
-                                                # ,
-                                                # 'severity': '{}'.format(severity),
-                                                # 'throttle': '{}'.format(throttle),
-                                                # 'burst': '{}'.format(burst)
+                                                'class':'{}'.format(al),
+                                                'throttle': '5/min',
+                                                'burst': '1/sec'
                                             })
 
 
