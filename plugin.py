@@ -43,6 +43,7 @@ class MethodTshark:
             pass
 
         cmd = ['tshark', '-r', self.pcap, '-Y', 'bthci_evt.bd_addr', '-w', self.output]
+        print(f'Processing \'{self.pcap}\' ...')
         subprocess.run(cmd)
 
     def capture(self):
