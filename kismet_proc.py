@@ -7,41 +7,21 @@ import json
 from requests.exceptions import HTTPError
 from config import credentials
        
+
 class kismet():
     '''
-        
+        Python3 kismet_proc.py -t add-alert -a APSPOOF
+        Python3 kismet_proc.py -t add-source -s captures/Bluetooth1.cap
     '''
     def __init__(self, source, task, alert):
         self.source = source
         self.task = task
         self.alert = alert
 
-    def api_call(self, url):
-        '''
-        '''
-        try:
-            resp = requests.get("http://{}:{}@localhost:2501/{}".format(
-                                        credentials['username'], 
-                                        credentials['password'], 
-                                        url
-                                    ))
-            if resp.status_code == 200: return resp.text
-
-        except HTTPError as http_err:
-            print(f'HTTP error occurred: {http_err}')
-        
-    def check_login(self):
-        '''
-        '''
-        resp = self.api_call("session/check_login")
-        if resp == 401: 
-            print('ERROR: invalid login credentials')
-            return -1
-    
     def get_active_logs(self):
         '''
         '''
-        resp = self.api_call("logging/active.itjson")
+        resp = self.api_call("logging/active.itjson", s)
         if resp == 404:
             print('ERROR: no active logs found')
         
@@ -51,7 +31,7 @@ class kismet():
     def get_datasources(self):
         '''
         '''
-        resp = self.api_call("datasource/all_sources.json")
+        resp = self.api_call("datasource/all_sources.json", s)
         if resp == 404:
             print('ERROR: no datasources defined')
         
@@ -59,60 +39,82 @@ class kismet():
         resp = json.loads(resp)
         return resp
     
-    def view_alert(self):
+    def api_call(self, path, s):
         '''
+            params
+                path -- path of request, excluding the root path
+                s -- current session 
+            
         '''
-        resp = self.api_call("alerts/alerts_view.json")
+        resp = None
+        try:
+            resp = s.get("http://{}:{}@localhost:2501/{}".format(
+                                        credentials['username'], 
+                                        credentials['password'], 
+                                        path
+                                    ))
+        except HTTPError as http_err:
+            print(f'HTTP error occurred: {http_err}')
+
+        except ERROR as e:
+            print('ERROR')
+        
         return resp
-
-    def add_datasource(self):
-        '''
-           add a datasource to a session
-
-           https://www.kismetwireless.net/docs/devel/webui_rest/datasources/
-        '''
-        for src in self.source:
-            path = os.path.abspath(os.path.dirname(src))
-            requests.post("http://{}:{}@localhost:2501/datasource/add_source.cmd".format(
-                                    credentials['username'], 
-                                    credentials['password']), 
-                                    data={
-                                        "source":path,
-                                        'name': '{}'.format(src),
-                                        'realtime': 'false'
-                                    })
-
-    def add_alert(self):
-        '''
-            add an alert to a session
-
-            https://www.kismetwireless.net/docs/devel/webui_rest/alerts/
-        '''
-        for al in self.alert:
-            requests.post("http://{}:{}@localhost:2501/alerts/definitions/define_alert.cmd".format(
-                                            credentials['username'], 
-                                            credentials['password']), 
-                                            data={
-                                                'class':'{}'.format(al),
-                                                'throttle': '5/min',
-                                                'burst': '1/sec'
-                                            })
-
+        
+    def start_up(self, s):
+        # no session cookie
+        if self.api_call('auth/apikey/list.json', s).json()[0]['kismet.httpd.auth.token'] == None:
+            
+            # create admin API token. this will be the master one for the system. no exp
+            s.post("http://{}:{}@localhost:2501/auth/apikey/generate.cmd".format(
+                                credentials['username'], credentials['password']), 
+                                data={
+                                    'name': credentials['username'],
+                                    'role': 'admin'
+                                })
+        sessionCookie = self.api_call('auth/apikey/list.json', s).json()[0]['kismet.httpd.auth.token']
+        
+        resp = self.api_call("session/check_session", s)
+        if resp == 401: 
+            print('ERROR: invalid login credentials')
+            return -1
+        s.get('https://httpbin.org/cookies/set/sessioncookie/{}'.format(sessionCookie)) # set session cookie as our API token
+        return sessionCookie
 
     def run_task(self):
         '''
-            Runs a routine specified via command line. Either analysis of ids or add source.
         '''
-        if self.check_login() == -1: 
-            sys.exit()
+        session = requests.Session()
+        sessionCookie = self.start_up(session)
+        print(sessionCookie)
+        if self.task == 'add-alert':
+            session.post("http://{}:{}:{}@localhost:2501/alerts/definitions/define_alert.cmd".format(
+                                credentials['username'], credentials['password'], sessionCookie), 
+                                data={
+                                    'name': credentials['username'],
+                                    'class': self.alert,
+                                    'role': 'admin',
+                                    'severity':10,
+                                    'description': 'desc',
+                                    'throttle': '5/min',
+                                    'burst': '1/sec'
+                                })
+            
+        if self.task == 'add-source':
+            for src in self.source:
+                path = os.path.join(os.getcwd(), os.path.abspath(src))
+                src = '/' + src
+                source = "{}:type=pcapfile,name=test,realtime=false".format(src)
+                print(source)
+                status = requests.post("http://{}:{}:{}@localhost:2501/datasource/add_source.cmd".format(
+                                        credentials['username'], credentials['password'], sessionCookie), 
+                                        data={
+                                            "definition":source
+                                        }).text
+                print(status)
+                
 
-        elif self.task == 'add-source':
-            self.add_datasource()
-
-        elif self.task == 'add-alert':
-            self.add_alert()
-
-        elif self.task == 'analysis':
+        if self.task == 'analysis':
             print('USER: {}'.format(credentials['username']))
             print('DATA SOURCES: {}'.format(self.get_datasources()))
             print('ACTIVE LOGS: {}'.format(self.get_active_logs()))
@@ -120,11 +122,11 @@ class kismet():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--file', nargs='*', type=str)
+    parser.add_argument('-s', '--datasource', nargs='*', type=str)
     parser.add_argument('-a', '--alert', nargs='*', type=str)
-    parser.add_argument('-t', '--task',  choices = ['analysis', 'add-source', 'add-alert'], required=True, type=str)
+    parser.add_argument('-t', '--task',  choices = ['analysis', 'add-source', 'add-alert'], type=str)
     contents = parser.parse_args()
-    kis = kismet(contents.file, contents.task, contents.alert)
+    kis = kismet(contents.datasource, contents.task, contents.alert)
     kis.run_task()
     
 if __name__ == '__main__':
