@@ -16,6 +16,9 @@ def main():
 
     if args.read is not None:
         tshark.filter()
+    elif args.read is None:
+        tshark.output_file()
+        tshark.filter()
     elif args.interface is not None and args.capture is not None:
         tshark.capture()
     elif args.interface is not None and args.capture is None:
@@ -32,8 +35,8 @@ class MethodTshark:
         self.capture = capture
         self.interface = interface
 
-    def filter(self):
-        # channel is a 11
+    def output_file(self):
+        # create default output file if one is not specified
         i = 0
         if not self.output:
             while os.path.exists('capture-%s.pcap' % i):
@@ -41,6 +44,11 @@ class MethodTshark:
             self.output = 'capture-%s.pcap' % i
         else:
             pass
+        return self.output
+    
+    def filter(self):
+        # uses tshark via subprocess to apply the filter to the input and output a file
+        # channel is a 11
 
         cmd = ['tshark', '-r', self.pcap, '-Y', 'bthci_evt.bd_addr', '-w', self.output]
         print(f'Processing \'{self.pcap}\' ...')
