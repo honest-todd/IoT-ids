@@ -9,8 +9,8 @@ from config import credentials
 
 class kismet():
     '''
-        Python3 kismet_proc.py -t add-alert -a APSPOOF
-        Python3 kismet_proc.py -t add-source -s captures/Bluetooth1.pcap
+        Python3 kismet_proc.py -a APSPOOF
+        Python3 kismet_proc.py -s captures/Bluetooth1.pcap
     '''
     def __init__(self, source, alert):
         self.source = source
@@ -18,17 +18,18 @@ class kismet():
         
         self.session = requests.Session()
         self.session.auth = (credentials['username'], credentials['password'])
-        if not self.api_call('auth/apikey/list.json').text:
+        if self.api_call('auth/apikey/list.json').text == '[]':
             # create admin API token.
-            session.post("http://{}:{}@localhost:2501/auth/apikey/generate.cmd".format(
-                                credentials['username'], credentials['password']), 
-                                json={
-                                    'name': credentials['username'],
-                                    'role': 'admin',
-                                    'duration': 0
-                                })
-        self.session.session_key = self.api_call('auth/apikey/list.json').json()
-    
+            status = self.session.post("http://@localhost:2501/auth/apikey/generate.cmd", 
+                                    json={
+                                        'name': credentials['username'],
+                                        'role': 'admin',
+                                        'duration': 0
+                                    })
+            print(status.json)
+            
+        self.session.session_key = self.api_call('auth/apikey/list.json').json()[0]
+        
     def api_call(self, path):
         '''
             params
