@@ -11,84 +11,47 @@ from config import credentials
 class kismet():
     '''
         Python3 kismet_proc.py -t add-alert -a APSPOOF
-        Python3 kismet_proc.py -t add-source -s captures/Bluetooth1.cap
+        Python3 kismet_proc.py -t add-source -s captures/Bluetooth1.pcap
     '''
     def __init__(self, source, task, alert):
         self.source = source
         self.task = task
         self.alert = alert
-
-    def get_active_logs(self):
-        '''
-        '''
-        resp = self.api_call("logging/active.itjson", s)
-        if resp == 404:
-            print('ERROR: no active logs found')
         
-        return json.loads(resp)
-    
-    
-    def get_datasources(self):
-        '''
-        '''
-        resp = self.api_call("datasource/all_sources.json", s)
-        if resp == 404:
-            print('ERROR: no datasources defined')
-        
-        # convert to json
-        resp = json.loads(resp)
-        return resp
-    
-    def api_call(self, path, s):
-        '''
-            params
-                path -- path of request, excluding the root path
-                s -- current session 
-            
-        '''
-        resp = None
-        try:
-            resp = s.get("http://@localhost:2501/{}".format(
-                                        path
-                                    ))
-        except HTTPError as http_err:
-            print(f'HTTP error occurred: {http_err}')
-
-        except ERROR as e:
-            print('ERROR')
-        
-        return resp
-        
-    def start_up(self, s):
-        # no session cookie
-        # print(self.api_call('auth/apikey/list.json', s).status_code)
-        if self.api_call('auth/apikey/list.json', s).text:
-            
-            # create admin API token. this will be the master one for the system. no exp
-            s.post("http://{}:{}@localhost:2501/auth/apikey/generate.cmd".format(
+        self.session = requests.Session()
+        self.session.auth = (credentials['username'], credentials['password'])
+        if not self.api_call('auth/apikey/list.json').text:
+            # create admin API token.
+            session.post("http://{}:{}@localhost:2501/auth/apikey/generate.cmd".format(
                                 credentials['username'], credentials['password']), 
                                 json={
                                     'name': credentials['username'],
                                     'role': 'admin',
                                     'duration': 0
                                 })
-        cookie = self.api_call('auth/apikey/list.json', s).json()
-
-        resp = self.api_call("session/check_session", s)
-        if resp == 401: 
-            print('ERROR: invalid login credentials')
-            return -1
-        print(cookie)
-        return cookie
+        self.session.session_key = self.api_call('auth/apikey/list.json').json()
+    
+    def api_call(self, path):
+        '''
+            params
+                path -- path of request, excluding the root path
+        '''
+        resp = None
+        try:
+            resp = self.session.get("http://@localhost:2501/{}".format(path))
+        except HTTPError as http_err:
+            print(f'HTTP error occurred: {http_err}')
+        except ERROR as e:
+            print('ERROR')
+        
+        return resp
 
     def run_task(self):
         '''
+        
         '''
-        session = requests.Session()
-        session.auth = (credentials['username'], credentials['password'])
-        cookie = self.start_up(session)
         if self.task == 'add-alert':
-            status = session.post("http://{}:{}:{}@localhost:2501/alerts/definitions/define_alert.cmd".format(
+            status = self.session.post("http://{}:{}:{}@localhost:2501/alerts/definitions/define_alert.cmd".format(
                                 credentials['username'], credentials['password'], cookie[0]), 
                                 json={
                                     'name': 'APSPOOF',
@@ -105,7 +68,7 @@ class kismet():
             for src in self.source:
                 path = os.path.join(os.getcwd(), os.path.abspath(src))
                 source = "{}:type=pcapfile,name=test,realtime=false".format(path)
-                status = session.post("http://@localhost:2501/datasource/add_source.cmd", 
+                status = self.session.post("http://@localhost:2501/datasource/add_source.cmd", 
                                         json={
                                             "definition":source
                                         }).status_code
