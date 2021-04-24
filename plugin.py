@@ -14,9 +14,9 @@ def main():
     args = parser.parse_args()
     tshark = MethodTshark(args.read, args.output, args.capture, args.interface)
 
-    if args.read is not None:
+    if args.output is not None:
         tshark.filter()
-    elif args.read is None:
+    elif args.output is None:
         tshark.output_file()
         tshark.filter()
     elif args.interface is not None and args.capture is not None:
