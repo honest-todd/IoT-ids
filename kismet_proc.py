@@ -48,9 +48,7 @@ class kismet():
         '''
         resp = None
         try:
-            resp = s.get("http://{}:{}@localhost:2501/{}".format(
-                                        credentials['username'], 
-                                        credentials['password'], 
+            resp = s.get("http://@localhost:2501/{}".format(
                                         path
                                     ))
         except HTTPError as http_err:
@@ -74,61 +72,51 @@ class kismet():
                                     'role': 'admin',
                                     'duration': 0
                                 })
-        sessionCookie = self.api_call('auth/apikey/list.json', s).json()
+        cookie = self.api_call('auth/apikey/list.json', s).json()
 
         resp = self.api_call("session/check_session", s)
         if resp == 401: 
             print('ERROR: invalid login credentials')
             return -1
-        # s.get('https://httpbin.org/cookies/set/sessioncookie/{}'.format(sessionCookie)) # set session cookie as our API token
-        # sessionCookie = s.get('https://httpbin.org/cookies')
-        print(sessionCookie)
-        return sessionCookie
+        print(cookie)
+        return cookie
 
     def run_task(self):
         '''
         '''
         session = requests.Session()
-        sessionCookie = self.start_up(session)
-        # cj = requests.cookies.cookiejar_from_dict(sessionCookie[0])
+        session.auth = (credentials['username'], credentials['password'])
+        cookie = self.start_up(session)
         if self.task == 'add-alert':
-            session.post("http://{}:{}:{}@localhost:2501/alerts/definitions/define_alert.cmd".format(
-                                credentials['username'], credentials['password'], sessionCookie[0]), 
+            status = session.post("http://{}:{}:{}@localhost:2501/alerts/definitions/define_alert.cmd".format(
+                                credentials['username'], credentials['password'], cookie[0]), 
                                 json={
-                                    'name': credentials['username'],
-                                    'class': self.alert,
+                                    'name': 'APSPOOF',
+                                    'class': str(self.alert),
                                     'role': 'admin',
                                     'severity':10,
                                     'description': 'desc',
                                     'throttle': '5/min',
                                     'burst': '1/sec'
-                                })
+                                }).text
+            print(status)
             
         if self.task == 'add-source':
             for src in self.source:
                 path = os.path.join(os.getcwd(), os.path.abspath(src))
-                src = '/' + src
-                source = "{}:type=pcapfile,name=test,realtime=false".format(src)
-                print(source)
-                status = session.post("http://{}:{}:{}@localhost:2501/datasource/add_source.cmd".format(
-                                        credentials['username'], credentials['password'], sessionCookie[0]['kismet.httpd.auth.token']), 
+                source = "{}:type=pcapfile,name=test,realtime=false".format(path)
+                status = session.post("http://@localhost:2501/datasource/add_source.cmd", 
                                         json={
                                             "definition":source
-                                        }).text
+                                        }).status_code
                 print(status)
-                
-
-        if self.task == 'analysis':
-            print('USER: {}'.format(credentials['username']))
-            print('DATA SOURCES: {}'.format(self.get_datasources()))
-            print('ACTIVE LOGS: {}'.format(self.get_active_logs()))
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--datasource', nargs='*', type=str)
     parser.add_argument('-a', '--alert', nargs='*', type=str)
-    parser.add_argument('-t', '--task',  choices = ['analysis', 'add-source', 'add-alert'], type=str)
+    parser.add_argument('-t', '--task',  choices = ['add-source', 'add-alert'], type=str)
     contents = parser.parse_args()
     kis = kismet(contents.datasource, contents.task, contents.alert)
     kis.run_task()
