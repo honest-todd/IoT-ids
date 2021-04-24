@@ -74,10 +74,10 @@ class kismet():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--datasource', nargs='*', type=str)
+    parser.add_argument('-s', '--source', nargs='*', type=str)
     parser.add_argument('-a', '--alert', nargs='*', type=str)
     contents = parser.parse_args()
-    kis = kismet(contents.datasource, contents.alert)
+    kis = kismet(contents.source, contents.alert)
     kis.run_task()
     
 if __name__ == '__main__':
