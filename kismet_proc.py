@@ -63,22 +63,26 @@ class kismet():
         
     def start_up(self, s):
         # no session cookie
-        if self.api_call('auth/apikey/list.json', s).json()[0]['kismet.httpd.auth.token'] == None:
+        # print(self.api_call('auth/apikey/list.json', s).status_code)
+        if self.api_call('auth/apikey/list.json', s).text:
             
             # create admin API token. this will be the master one for the system. no exp
             s.post("http://{}:{}@localhost:2501/auth/apikey/generate.cmd".format(
                                 credentials['username'], credentials['password']), 
-                                data={
+                                json={
                                     'name': credentials['username'],
-                                    'role': 'admin'
+                                    'role': 'admin',
+                                    'duration': 0
                                 })
-        sessionCookie = self.api_call('auth/apikey/list.json', s).json()[0]['kismet.httpd.auth.token']
-        
+        sessionCookie = self.api_call('auth/apikey/list.json', s).json()
+
         resp = self.api_call("session/check_session", s)
         if resp == 401: 
             print('ERROR: invalid login credentials')
             return -1
-        s.get('https://httpbin.org/cookies/set/sessioncookie/{}'.format(sessionCookie)) # set session cookie as our API token
+        # s.get('https://httpbin.org/cookies/set/sessioncookie/{}'.format(sessionCookie)) # set session cookie as our API token
+        # sessionCookie = s.get('https://httpbin.org/cookies')
+        print(sessionCookie)
         return sessionCookie
 
     def run_task(self):
@@ -86,11 +90,11 @@ class kismet():
         '''
         session = requests.Session()
         sessionCookie = self.start_up(session)
-        print(sessionCookie)
+        # cj = requests.cookies.cookiejar_from_dict(sessionCookie[0])
         if self.task == 'add-alert':
             session.post("http://{}:{}:{}@localhost:2501/alerts/definitions/define_alert.cmd".format(
-                                credentials['username'], credentials['password'], sessionCookie), 
-                                data={
+                                credentials['username'], credentials['password'], sessionCookie[0]), 
+                                json={
                                     'name': credentials['username'],
                                     'class': self.alert,
                                     'role': 'admin',
@@ -106,9 +110,9 @@ class kismet():
                 src = '/' + src
                 source = "{}:type=pcapfile,name=test,realtime=false".format(src)
                 print(source)
-                status = requests.post("http://{}:{}:{}@localhost:2501/datasource/add_source.cmd".format(
-                                        credentials['username'], credentials['password'], sessionCookie), 
-                                        data={
+                status = session.post("http://{}:{}:{}@localhost:2501/datasource/add_source.cmd".format(
+                                        credentials['username'], credentials['password'], sessionCookie[0]['kismet.httpd.auth.token']), 
+                                        json={
                                             "definition":source
                                         }).text
                 print(status)
