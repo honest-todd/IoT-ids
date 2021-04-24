@@ -9,7 +9,7 @@ from config import credentials
 
 class kismet():
     '''
-        Python3 kismet_proc.py -a APSPOOF
+        Python3 kismet_proc.py -a SPOOF
         Python3 kismet_proc.py -s captures/Bluetooth1.pcap
     '''
     def __init__(self, source, alert):
