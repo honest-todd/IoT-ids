@@ -1,6 +1,5 @@
 #!/usr/local/bin/python3.9
 import os, sys
-import uuid
 import requests
 import argparse
 import json
@@ -13,9 +12,8 @@ class kismet():
         Python3 kismet_proc.py -t add-alert -a APSPOOF
         Python3 kismet_proc.py -t add-source -s captures/Bluetooth1.pcap
     '''
-    def __init__(self, source, task, alert):
+    def __init__(self, source, alert):
         self.source = source
-        self.task = task
         self.alert = alert
         
         self.session = requests.Session()
@@ -50,9 +48,8 @@ class kismet():
         '''
         
         '''
-        if self.task == 'add-alert':
-            status = self.session.post("http://{}:{}:{}@localhost:2501/alerts/definitions/define_alert.cmd".format(
-                                credentials['username'], credentials['password'], cookie[0]), 
+        if self.alert:
+            status = self.session.post("http://@localhost:2501/alerts/definitions/define_alert.cmd", 
                                 json={
                                     'name': 'APSPOOF',
                                     'class': str(self.alert),
@@ -64,7 +61,7 @@ class kismet():
                                 }).text
             print(status)
             
-        if self.task == 'add-source':
+        if self.source:
             for src in self.source:
                 path = os.path.join(os.getcwd(), os.path.abspath(src))
                 source = "{}:type=pcapfile,name=test,realtime=false".format(path)
@@ -79,9 +76,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--datasource', nargs='*', type=str)
     parser.add_argument('-a', '--alert', nargs='*', type=str)
-    parser.add_argument('-t', '--task',  choices = ['add-source', 'add-alert'], type=str)
     contents = parser.parse_args()
-    kis = kismet(contents.datasource, contents.task, contents.alert)
+    kis = kismet(contents.datasource, contents.alert)
     kis.run_task()
     
 if __name__ == '__main__':
