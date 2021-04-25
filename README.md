@@ -1,4 +1,4 @@
-# Kismet Bluetooth tool
+# Kismet Bluetooth Tool
 Kismet is a popular open-source wireless intrusion detection system. Although it was powerful features such as realtime monitoring, it has limited Bluetooth capabilites. Our solution is to streamline filtered Bluetooth Radio Frequency (RF) traffic and other Bluetooth traffic sources from Wireshark into Kismet for processing.
 
 Features
@@ -16,20 +16,9 @@ Usage
 ```
 Kismet
 ```
-2. run the plugin
-> usage: plugin.py [-h] [--read READ] [--interface INTERFACE] [--capture [CAPTURE ...]] [--output OUTPUT]
+2. run plugin.py
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --read READ, -r READ  read pcap file
-  --interface INTERFACE, -i INTERFACE
-                        set capture interface
-  --capture [CAPTURE ...], -c [CAPTURE ...]
-                        live capture using ubertooth
-  --output OUTPUT, -o OUTPUT
-                        specify outfile
-
-
+![](usage.png)
 
 
 Requirements
