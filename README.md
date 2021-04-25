@@ -1,18 +1,23 @@
 # Kismet Bluetooth tool
-Kismet is a popular open-source wireless intrusion detection system. Although it was powerful features such as realtime monitoring, it has limited Bluetooth capabilites. Our solution is to streamline filtered Bluetooth Radio Frequency (RF) traffic from Wireshark into Kismet for processing. 
+Kismet is a popular open-source wireless intrusion detection system. Although it was powerful features such as realtime monitoring, it has limited Bluetooth capabilites. Our solution is to streamline filtered Bluetooth Radio Frequency (RF) traffic and other Bluetooth traffic sources from Wireshark into Kismet for processing.
 
 Features
 ---------------
-* comma 
-* 
+* capture Bluetooth Radio Frequency (RF) traffic
+* read and filter capture files 
+* authenticate a kismet session
+* add datasources and alerts to kismet
+* alert users of errors or suspicious activity
 
 Usage
 ------
-1. 
+1. Start web server -- this allows us to query the Kismet rest api
 ```
 Kismet
 ```
->sets up rest api to query
+2. 
+
+
 
 Requirements
 --------------
@@ -36,6 +41,8 @@ Contribute
 -------------------
 Any contribution is appreciated. 
 
-If you are interested in adding any feature here are some possible extensions:
-* websockets support to utilize Kismets realtime eventbus system
-* 
+If you are interested in adding any feature here are some possible extensions and know issues:
+* fix the alert system
+* add websockets support to utilize Kismets realtime eventbus system
+
+
