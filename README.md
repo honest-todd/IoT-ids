@@ -11,11 +11,24 @@ Features
 
 Usage
 ------
-1. Start web server -- this allows us to query the Kismet rest api
+1.  add your Kismet username and password to config.py
+2.  start the kismet web server -- this allows us to query the Kismet rest api
 ```
 Kismet
 ```
-2. 
+2. run the plugin
+> usage: plugin.py [-h] [--read READ] [--interface INTERFACE] [--capture [CAPTURE ...]] [--output OUTPUT]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --read READ, -r READ  read pcap file
+  --interface INTERFACE, -i INTERFACE
+                        set capture interface
+  --capture [CAPTURE ...], -c [CAPTURE ...]
+                        live capture using ubertooth
+  --output OUTPUT, -o OUTPUT
+                        specify outfile
+
 
 
 
