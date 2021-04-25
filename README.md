@@ -8,9 +8,18 @@ Features
 
 Usage
 ------
+1. 
+```
+Kismet
+```
+>sets up rest api to query
 
 Requirements
 --------------
+* Python3
+* Wireshark
+* Requests.py
+* See [Kismet](https://www.kismetwireless.net/downloads/) for Kismets requirments
 
 
 Implementation
@@ -21,7 +30,7 @@ This project contains two command-line scripts with the intent of propagating Bl
 Original Developers
 -------------------
 * Julian Galbraith-Paul - [honest-todd](https://github.com/honest-todd)
-* Noah Kenton = [noahkenton](https://github.com/noahkenton)
+* Noah Kenton - [noahkenton](https://github.com/noahkenton)
 
 Contribute
 -------------------
