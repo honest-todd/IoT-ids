@@ -1,4 +1,4 @@
-# Kismet Bluetooth tool
+# Kismet Bluetooth Tool
 Kismet is a popular open-source wireless intrusion detection system. Although it was powerful features such as realtime monitoring, it has limited Bluetooth capabilites. Our solution is to streamline filtered Bluetooth Radio Frequency (RF) traffic and other Bluetooth traffic sources from Wireshark into Kismet for processing.
 
 Features
