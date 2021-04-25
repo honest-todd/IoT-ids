@@ -26,10 +26,15 @@ optional arguments:
   --read READ, -r READ  read pcap file
   
   --interface INTERFACE, -i INTERFACE
+  
                         set capture interface
+                        
   --capture [CAPTURE ...], -c [CAPTURE ...]
+  
                         live capture using ubertooth
+                        
   --output OUTPUT, -o OUTPUT
+  
                         specify outfile
 
 
