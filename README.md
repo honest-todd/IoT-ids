@@ -18,26 +18,7 @@ Kismet
 ```
 2. run the plugin
 
-usage: plugin.py [-h] [--read READ] [--interface INTERFACE] [--capture [CAPTURE ...]] [--output OUTPUT]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  
-  --read READ, -r READ  read pcap file
-  
-  --interface INTERFACE, -i INTERFACE
-  
-                        set capture interface
-                        
-  --capture [CAPTURE ...], -c [CAPTURE ...]
-  
-                        live capture using ubertooth
-                        
-  --output OUTPUT, -o OUTPUT
-  
-                        specify outfile
-
-
+![](usage.png)
 
 
 Requirements
