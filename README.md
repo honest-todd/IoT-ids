@@ -1,40 +1,32 @@
-# Capturing Bluetooth Traffic using Wireshark
-Wireshark can be accesed using the terminal command:
+# Kismet Bluetooth tool
+Kismet is a popular open-source wireless intrusion detection system. Although it was powerful features such as realtime monitoring, it has limited Bluetooth capabilites. Our solution is to streamline filtered Bluetooth Radio Frequency (RF) traffic from Wireshark into Kismet for processing. 
 
-```bash
-$ wireshark
-```
-This will open the wireshark GUI
+Features
+---------------
+* comma 
+* 
 
-Bluetooth traffic can either be captured life or the path of a pcap file can be used.
-To find the mac addressed for the Bluetooth traffic being analysed type the following in the address bar:
+Usage
+------
 
-### bthci_evt.bd_addr
+Requirements
+--------------
 
-Finally, you can export the resulting packets as a pcap by going to File and selecting:
 
-### Export Specified Packets...
+Implementation
+-------------------
+This project contains two command-line scripts with the intent of propagating Bluetooth packets from Wireshark to Kismet for processing. First, packets are captured through Wireshark. Then the resulting packets are exported into a directory and processed by Kismet. THe script handles all of the validation process and among other functionalities, alerts the user if any malicious activity has been reported when processing a capture file. This alert will be issued via the Kismet browser interface, where an admin can visualize aspects of their current session.
 
-# Processing the Data
 
-We will process data sources via the **command line** 
+Original Developers
+-------------------
+* Julian Galbraith-Paul - [honest-todd](https://github.com/honest-todd)
+* Noah Kenton = [noahkenton](https://github.com/noahkenton)
 
-compile various commands with control flow into a script in some language...
+Contribute
+-------------------
+Any contribution is appreciated. 
 
-# Load Data into Kismet
-
-Kismet recieves data (which can be packets, devices, or other information) from “data sources”
- - we will use pcap files as our primary viable data source... Ubertooth... more?
-
-```Python
-Python3 kismet_proc.py -t add-source -f file.cap
-```
-
-# config APSPOOF
-
-ASPOOF: Essentially a list of valid MAC addresses for a given SSID used to mediate activity.
-* If a beacon or probe response for that SSID is seen from a MAC address not found in that list, an alert will be raised. This can be used to detect spoofed or evil twin attacks and attacks like Karma, however it will not detect attacks which also spoof the MAC address --- what if they do...
-
-```Python
-Python3 kismet_proc.py -t add-alert -a SPOOF
-```
+If you are interested in adding any feature here are some possible extensions:
+* websockets support to utilize Kismets realtime eventbus system
+* 
