@@ -20,8 +20,7 @@ def main():
 
     if args.automated is True:
         MethodTshark(args.read, output, None, None).filter()
-        subprocess.Popen(['kismet'])
-        kismet_proc.kismet(output, None, 'add-source')
+        kismet_proc.kismet(output, 'add-source')
     elif args.run is not None:
         plugin.main()
         kismet_proc.main()
