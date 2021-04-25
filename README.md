@@ -16,7 +16,7 @@ Usage
 ```
 Kismet
 ```
-2. run the plugin
+2. run plugin.py
 
 ![](usage.png)
 
