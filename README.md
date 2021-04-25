@@ -31,7 +31,7 @@ Requirements
 
 Implementation
 -------------------
-This project contains two command-line scripts with the intent of propagating Bluetooth packets from Wireshark to Kismet for processing. First, packets are captured through Wireshark. Then the resulting packets are exported into a directory and processed by Kismet. THe script handles all of the validation process and among other functionalities, alerts the user if any malicious activity has been reported when processing a capture file. This alert will be issued via the Kismet browser interface, where an admin can visualize aspects of their current session.
+This project contains a command-line script with the power to propagating Bluetooth packets from Wireshark to Kismet for processing. First, packets are captured through Wireshark. Then the resulting packets are exported into a directory and processed by Kismet. THe script handles all of the validation process and among other functionalities, alerts the user if any malicious activity has been reported when processing a capture file. This alert will be issued via the Kismet browser interface, where an admin can visualize aspects of their current session.
 
 
 Original Developers
