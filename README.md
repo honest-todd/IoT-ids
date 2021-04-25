@@ -22,7 +22,7 @@ Kismet
 Requirements
 --------------
 * Python3
-* Wireshark
+* Wireshark / Tshark
 * Requests.py
 * See [Kismet](https://www.kismetwireless.net/downloads/) for Kismets requirments
 
