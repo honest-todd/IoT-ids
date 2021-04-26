@@ -44,7 +44,6 @@ Contribute
 Any contribution is appreciated. 
 
 If you are interested in adding any feature here are some possible extensions and know issues:
-* fix the alert system
 * add websockets support to utilize Kismets realtime eventbus system
 
 
