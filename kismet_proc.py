@@ -1,17 +1,19 @@
-#!/usr/local/bin/python3.9
+#!/usr/local/bin/python3
+
 import os, sys
 import requests
 import argparse
 import json
-import asyncio
-import websockets
 import time
 from requests.exceptions import HTTPError
 from config import credentials
+# import asyncio
+# import websockets
        
 
 class kismet():
     '''
+        Python3 kismet_proc.py
         Python3 kismet_proc.py -a SPOOF
         Python3 kismet_proc.py -s capture-1.pcap
     '''
@@ -21,17 +23,17 @@ class kismet():
         
         self.session = requests.Session()
         self.session.auth = (credentials['username'], credentials['password'])
-        # if self.api_call('auth/apikey/list.json').text == '[]':
-        #     # create admin API token.
-        #     status = self.session.post("http://@localhost:2501/auth/apikey/generate.cmd", 
-        #                             json={
-        #                                 'name': credentials['username'],
-        #                                 'role': 'admin',
-        #                                 'duration': 0
-        #                             })
-        #     print(status.json)
+        if self.api_call('auth/apikey/list.json').text == '[]':
+            # create admin API token.
+            status = self.session.post("http://@localhost:2501/auth/apikey/generate.cmd", 
+                                    json={
+                                        'name': credentials['username'],
+                                        'role': 'admin',
+                                        'duration': 0
+                                    })
+            print(status.json)
             
-        # self.session.session_key = self.api_call('auth/apikey/list.json').json()[0]
+        self.session.session_key = self.api_call('auth/apikey/list.json').json()[0]
         
     def api_call(self, path):
         '''
@@ -50,7 +52,7 @@ class kismet():
             
     def run_task(self):
         '''
-        
+            adds an alert or source to Kismet
         '''
         if self.alert:
             status = self.session.post("http://@localhost:2501/alerts/definitions/define_alert.cmd", 
@@ -74,13 +76,6 @@ class kismet():
                                             "definition":source
                                         }).status_code
                 print(status)
-                
-        
-        resp = self.api_call('messagebus/last-time/{}/messages.json'.format(time.time()-60*25*1000))
-        f = open('datasource.json', 'w+')
-        f.write(resp.text)
-        f.close()
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -92,3 +87,13 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
+
+# async def hello():
+#         uri = 'ws://host:2501'
+#         async with websockets.connect(uri) as websocket:
+#             req = {"SUBSCRIBE": "TIMESTAMP"}
+#             await websocket.send(req)
+#             await websocket.recv()
+            
+# asyncio.get_event_loop().run_until_complete(hello())
