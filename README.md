@@ -11,12 +11,13 @@ Features
 
 Usage
 ------
-1.  add your Kismet username and password to config.py
-2.  start the kismet web server -- this allows us to query the Kismet rest api
+1.  clone and install dependencies(see requirements)
+2.  add your Kismet username and password to config.py
+3.  start the kismet web server -- this allows us to query the Kismet rest api
 ```
 Kismet
 ```
-2. run plugin.py
+4. run plugin.py
 
 ![](usage.png)
 
